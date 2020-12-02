@@ -25,17 +25,15 @@ C: <password-rule> password-rule
     [ " " split1-last swap parse-rule ] dip call( password rule -- t/f ) ;
 
 : find-2020-tuple ( sequences -- pair )
-    <product-sequence>
-    [ { [ all-unique? ] [ sum 2020 = ] } 1&& ] find nip ;
+    [ { [ all-unique? ] [ sum 2020 = ] } 1&& ] product-find
+    1 [ * ] reduce ;
 
-: problem1 ( -- )
-    "vocab:advent/1.input" utf8 file-lines
-    [ string>number ] map    
-    dup dup 2array find-2020-tuple .
-    dup dup 3array find-2020-tuple . ;
+:: day1 ( -- )
+    "vocab:advent/1.input" utf8 file-lines [ string>number ] map :> input
+    { input input } find-2020-tuple .
+    { input input input } find-2020-tuple . ;
 
-: problem2 ( -- )
-    "vocab:advent/2.input" utf8 file-lines
-    dup
-    [ [ password-validates-counts? ] password-line-validates? ] count .
-    [ [ password-validates-positions? ] password-line-validates? ] count . ;
+:: day2 ( -- )
+    "vocab:advent/2.input" utf8 file-lines :> input
+    input [ [ password-validates-counts? ] password-line-validates? ] count .
+    input [ [ password-validates-positions? ] password-line-validates? ] count . ;
