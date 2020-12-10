@@ -2,7 +2,8 @@ IN: advent
 
 USING: io io.files io.encodings.utf8
 arrays assocs accessors combinators.short-circuit kernel
-math math.order math.parser prettyprint
+hashtables
+math math.order math.parser math.vectors prettyprint
 sequences sequences.extras sequences.product sets splitting ;
 
 ! Day 1
@@ -61,4 +62,15 @@ C: <password-rule> password-rule
     input 5 count-trees acc push
     input 7 count-trees acc push
     input [ nip even? ] filter-index 1 count-trees acc push
-    acc . ;
+    acc product . ;
+
+: normalize-passports ( contents -- normalized )
+    "\n\n" split-subseq [ "\n" " " replace ] map ;
+
+: valid-passport? ( password -- valid? )
+    " " split harvest [ ":" split harvest ] map >hashtable
+    { "byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid" } [ dupd swap key? ] all? nip ;
+
+: day4 ( -- )
+    "vocab:advent/4.input" utf8 file-contents
+    normalize-passports [ valid-passport? ] count . ;
