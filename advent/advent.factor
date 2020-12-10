@@ -131,16 +131,8 @@ C: <seat> seat
 
 ! Day 6
 
-: group-answers-any ( lines -- answers )
-    "\n" split V{ } clone [
-        over [ over adjoin ] reduce union
-    ] reduce ;
-
-: group-answers-all ( lines -- answers )
-    "\n" split harvest dup first [ intersect ] reduce ;
-
-
 : day6 ( -- )
     "vocab:advent/6.input" utf8 file-contents "\n\n" split-subseq harvest
-    dup [ group-answers-any length ] map sum .
-    [ group-answers-all length ] map sum . ;
+    [ "\n" split harvest ] map dup
+    [ combine length ] map-sum .
+    [ refine length ] map sum . ;
