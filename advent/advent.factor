@@ -3,8 +3,9 @@ IN: advent
 USING: io io.files io.encodings.utf8
 arrays assocs accessors combinators combinators.short-circuit kernel
 hashtables regexp
-math math.order math.parser math.vectors prettyprint
-sequences sequences.extras sequences.product sets splitting ;
+math math.functions math.ranges math.order math.parser math.statistics math.vectors
+prettyprint
+sequences sequences.extras sequences.product sets splitting sorting ;
 
 ! Day 1
 : find-2020-tuple ( sequences -- pair )
@@ -64,6 +65,8 @@ C: <password-rule> password-rule
     input [ nip even? ] filter-index 1 count-trees acc push
     acc product . ;
 
+! Day 4
+
 : hashify-passport ( passport -- hashtable )
     " " split harvest [ ":" split harvest ] map >hashtable ;
 
@@ -91,3 +94,37 @@ C: <password-rule> password-rule
 : day4 ( -- )
     "vocab:advent/4.input" utf8 file-contents
     normalize-passports [ valid-passport? ] count . ;
+
+! Day 5
+
+TUPLE: seat-range rows columns ;
+C: <seat-range> seat-range
+TUPLE: seat row column ;
+C: <seat> seat
+
+: top ( tuple -- tuple )
+    dup mean floor [ first2 ] dip nip 2array ;
+
+: bottom ( tuple -- tuple )
+    dup mean ceiling [ first2 ] dip nipd swap 2array ;
+
+: narrow-seat-range ( string -- seat-range )
+    { 0 127 } { 0 7 } <seat-range> [
+        {
+            { CHAR: F [ [ top ] change-rows ] }
+            { CHAR: B [ [ bottom ] change-rows ] }
+            { CHAR: L [ [ top ] change-columns ] }
+            { CHAR: R [ [ bottom ] change-columns ] }
+        } case
+    ] reduce ;
+
+: parse-seat ( string -- seat )
+    narrow-seat-range [ rows>> first ] [ columns>> first ] bi <seat> ;
+
+: seat-score ( seat -- score )
+    [ row>> 8 * ] [ column>> ] bi + ;
+
+: day5 ( -- )
+    "vocab:advent/5.input" utf8 file-lines [ parse-seat seat-score ] map
+    "Part A" . dup supremum .
+    "Part B" . dup minmax [a,b] swap diff first . ;
