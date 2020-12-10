@@ -1,8 +1,8 @@
 IN: advent
 
 USING: io io.files io.encodings.utf8
-arrays assocs accessors combinators.short-circuit kernel
-hashtables
+arrays assocs accessors combinators combinators.short-circuit kernel
+hashtables regexp
 math math.order math.parser math.vectors prettyprint
 sequences sequences.extras sequences.product sets splitting ;
 
@@ -64,12 +64,29 @@ C: <password-rule> password-rule
     input [ nip even? ] filter-index 1 count-trees acc push
     acc product . ;
 
-: normalize-passports ( contents -- normalized )
-    "\n\n" split-subseq [ "\n" " " replace ] map ;
+: hashify-passport ( passport -- hashtable )
+    " " split harvest [ ":" split harvest ] map >hashtable ;
 
-: valid-passport? ( password -- valid? )
-    " " split harvest [ ":" split harvest ] map >hashtable
-    { "byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid" } [ dupd swap key? ] all? nip ;
+: normalize-passports ( contents -- normalized )
+    "\n\n" split-subseq [ "\n" " " replace hashify-passport ] map ;
+
+: valid-height? ( height -- t/f )
+    {
+        { [ dup R/ \d+cm/ matches? ] [ 2 head* string>number 150 193 between? ] }
+        { [ dup R/ \d+in/ matches? ] [ 2 head* string>number 59 76 between? ] }
+        [ drop f ]
+    } cond ;
+
+: valid-passport? ( passport -- t/f )
+    {
+        [ "byr" of { [ dup [ R/ \d{4}/ matches? ] when ] [ string>number 1920 2002 between? ] } 1&& ]
+        [ "iyr" of { [ dup [ R/ \d{4}/ matches? ] when ] [ string>number 2010 2020 between? ] } 1&& ]
+        [ "eyr" of { [ dup [ R/ \d{4}/ matches? ] when ] [ string>number 2020 2030 between? ] } 1&& ]
+        [ "hgt" of dup [ valid-height? ] when ]
+        [ "hcl" of dup [ R/ #\p{xdigit}{6}/ matches? ] when ]
+        [ "ecl" of { "amb" "blu" "brn" "gry" "grn" "hzl" "oth" } in? ]
+        [ "pid" of dup [ R/ \d{9}/ matches? ] when ]
+    } 1&& ;
 
 : day4 ( -- )
     "vocab:advent/4.input" utf8 file-contents
