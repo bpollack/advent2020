@@ -132,7 +132,6 @@ C: <seat> seat
 ! Day 6
 
 : day6 ( -- )
-    "vocab:advent/6.input" utf8 file-contents "\n\n" split-subseq harvest
-    [ "\n" split harvest ] map dup
+    "vocab:advent/6.input" utf8 file-lines { "" } split dup
     [ combine length ] map-sum .
     [ refine length ] map sum . ;
